@@ -63,7 +63,7 @@ public class Exercise3 extends Compara {
         for (String elem : treeset) {
             System.out.print(elem + " ");
         }
-        
+
         Iterator<String> it = treeset.iterator();
         TreeSet<String> tr = new TreeSet<String>(new Compara());
         tr.addAll(listToAdd);
