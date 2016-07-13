@@ -74,8 +74,11 @@ public class InfoHttpServlet extends HttpServlet {
         String[] param_values = new String[100];
 
         //...
-        for (String st : param_values) {
+       /* for (String st : param_values) {
             parameters_table.append("<td>" + st + "</td>");
+        }*/
+        while(param.hasMoreElements()){
+            parameters_table.append("<td>" + param.nextElement() + "</td>");
         }
         parameters_table.append("</tr></table>\n");
 
