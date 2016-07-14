@@ -1,0 +1,230 @@
+day2 ----------->
+
+
+select case job_id when 'AD_PRES' then 'A'
+                    when 'ST_MAN' then 'B'
+                    when 'IT_PROG' then 'C'
+                    when 'SA_REP' then 'D'
+                    when 'ST_CLERK' then 'E'
+                    ELSE '0'
+                  END GRADE
+            FROM EMPLOYEES;
+            
+select job_id,decode(job_id,'AD_PRES','A',
+              'ST_MAN','B',
+              'IT_PROG','C',
+              'SA_REP','D',
+              'ST_CLERK','E',
+              '0') grade
+              from employees;
+              
+select salary,case salary when 2000 then 'mic'
+                   when 3000 then 'mediu'
+                   when 5000 then 'mare'
+                   else 'ceva'
+                   end chestie
+                   from EMPLOYEES;
+                   
+select salary,decode(salary,2000,'mic',
+                       3000,'mediu',
+                       5000,'mare',
+                       'ceva') chestie
+                       from EMPLOYEES;
+                       
+select * from EMPLOYEES;
+select * from EMPLOYEES
+    where COMMISSION_PCT is null;
+
+select * from EMPLOYEES
+    where COMMISSION_PCT=null;     
+  
+select decode(commission_pct,null,1,commission_pct) from EMPLOYEES;
+
+select case commission_pct when null then 1
+                   else commission_pct
+                   end
+                   from employees;
+                   
+select a.first_name||' '||a.last_name,b.department_name,a.hire_date,trunc(add_months(a.hire_date,1),'MONTH')
+   from EMPLOYEES a, DEPARTMENTS b, locations c
+   where
+   a.MANAGER_ID=b.MANAGER_ID
+   and 
+   a.MANAGER_ID is not null
+   and
+   b.LOCATION_ID=c.LOCATION_ID
+   and 
+   lower(c.city)='seattle';
+   
+select a.first_name,b.department_name
+from employees a, departments b
+    where
+    a.department_id=b.department_id
+    and 
+    a.department_id is not null;
+
+   
+select a.first_name,b.department_name
+from employees a, departments b
+    where
+    a.department_id =b.department_id (+);
+    
+select count(1) from employees;
+
+select a.first_name,NVL ((select b.first_name from employees b
+                        WHERE
+                         a.manager_id= b.employee_id  ),'N/A')
+from employees a;
+
+SELECT * FROM EMPLOYEES CROSS JOIN DEPARTMENTS;
+
+select count(*) department_id
+    from employees 
+    group by department_id;
+    
+select round(avg(salary),2), min(salary), max(salary), sum(salary)
+     from employees
+     where job_id in('SA_REP','MK_REP','HR_REP','PR_REP')
+     group by department_id
+     having avg(salary)>7000;
+
+SELECT job_id,count(1)
+   from jobs
+   group by job_id;
+   
+select first_name,salary,department_id
+from employees
+   where(salary,department_id)
+   in
+   (select min(salary),department_id
+       from employees
+       group by department_id);
+       
+select first_name,salary,job_id,department_id
+from employees   /*some*/
+where salary > all (select distinct salary
+                     from employees
+                     where department_id=30)
+        order by salary asc;
+        
+select max(salary) from employees /*min(salary)*/
+     where department_id=30;
+
+--toti angajatii din dept 30 a caror dept e in seattle
+
+select first_name,last_name,ceva.city
+from employees emp,
+  (select a.employee_id,c.city
+      from employees a, departments b, locations c
+      where
+      b.location_id=c.location_id
+      and
+      b.department_id=30) ceva
+      where ceva.employee_id=emp.employee_id;
+   
+create table test3 as select * from employees where 1=2;
+
+select * from test3;
+
+insert into test3 select * from employees where department_id=30;
+
+commit;
+
+update test3 set department_id=40 where job_id='PU_MAN';
+
+delete from test3 where department_id=40;
+
+--MERGE
+merge into test3 t3 using (select employee_id from employees
+                         where 
+                         lower(first_name)='den') man
+          on (t3.manager_id=man.employee_id)
+          when matched then
+          update set job_id='SEL_REP';
+          
+select * from test3 where manager_id=114;
+
+select * from employees where 
+            lower(first_name)='den';
+
+update test3 set job_id='PR_REP' 
+    where manager_id=(select employee_id from employees 
+                      where lower(first_name) = 'den');
+                      
+commit;
+--update test3 salary=cel mai mic sal din dep 30 cu job_id='SEL_REP','PR_REP'
+
+update test3 set salary=(select min(salary) from employees a
+                         where a.department_id=30) 
+              where job_id in ('SEL_REP','PR_REP');
+              
+select * from test3;
+
+--tranzactie=grupare de adaugari,stergeri--->se inchide cu rollback/commit
+
+insert into test3 (employee_id,first_name,last_name,email,hire_date,job_id) values(100,'Ceva','Ceva','ceva@gmail.com',sysdate,'SEL_REP');
+update test3 set first_name='Chestie'
+    where employee_id=100;
+    
+savepoint a;
+
+select * from test3 where employee_id=100;
+update test3 set first_name='Update'
+    where employee_id=100;
+delete from test3 where employee_id=100;
+
+rollback to savepoint a;
+
+--locking
+
+--view
+create or replace view view1
+as (select employee_id,first_name||''||last_name nume, (select first_name||''||last_name nume1 from employees a
+                                                         where a.employee_id=emp.manager_id) manager_nume,
+                                                         dept.department_name                                
+             from employees emp, departments dept
+             where dept.department_id=emp.department_id);
+desc view1;
+select * from view1;
+
+create or replace view view2
+as select employee_id,first_name||''||last_name nume, (select first_name||''||last_name nume1 from employees a
+                                                         where a.employee_id=emp.manager_id) manager_nume,
+                                                         dept.department_name                                
+             from employees emp, departments dept
+             where dept.department_id=emp.department_id
+             and
+             emp.manager_id not in (select emp2.employee_id from employees emp2
+                     where emp.manager_id = emp2.employee_id);
+
+select * from employees where manager_id is null;
+select * from employees where employee_id=112;
+
+select count(1) from view2;
+
+create sequence secventa
+   start with 1
+   increment by 4
+   maxvalue 20
+   nocycle;
+select secventa.nextval from dual;
+select secventa.currval from dual;
+   
+create sequence secventa1
+   start with 1
+   increment by 4
+   maxvalue 50
+   cycle
+   cache 10;
+select secventa1.nextval from dual;
+select secventa1.currval from dual;
+
+create sequence secventa2
+   start with 1
+   increment by -4
+   minvalue -50
+   maxvalue 1
+   cycle
+   cache 10;
+select secventa2.nextval from dual;
+select secventa2.currval from dual;

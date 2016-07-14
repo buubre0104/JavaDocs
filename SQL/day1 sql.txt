@@ -1,0 +1,91 @@
+CREATE TABLE TEST1(
+  id number(5,2) primary key,
+  descriere varchar2(100) not null,
+  denumire varchar2(50) unique
+);
+
+insert into test1 values (1,'as','asd');
+alter table test1 add constraint ck_nn_den check (substr(denumire,1,3) in ('an')) novalidate;
+create table test2 as 
+  select * from EMPLOYEES;
+desc test2;
+select * from test2;
+alter table test2 add (pret number(3,2));
+desc test2;
+select * from test2;
+alter table test2 drop (pret);
+desc test2;
+alter table test1 modify(descriere varchar2(200));
+desc test1;
+drop table test1;
+delete from test2;
+rollback;
+select * from test2;
+truncate table test2;
+select uc.CONSTRAINT_NAME,uc.* from SYS.USER_CONSTRAINTS uc;
+
+select * from DEPARTMENTS;
+select department_id "departament ceva",department_name from departments;
+desc EMPLOYEES;
+select upper(last_name)|| ' ' ||lower(first_name) nume from EMPLOYEES;
+select last_name|| ' ' ||first_name nume from EMPLOYEES
+      where lower(FIRST_NAME)='ellen';
+select first_name,salary from EMPLOYEES
+      where salary BETWEEN 2000 AND 6000;
+select first_name,salary from EMPLOYEES
+      where salary in (2000, 6000);
+select * from EMPLOYEES
+      where lower(FIRST_NAME) like 's%';
+select * from EMPLOYEES
+      where lower(FIRST_NAME) like 's_even';
+select sysdate from dual;
+select nvl(commission_pct,8) from EMPLOYEES;
+select coalesce(commission_pct,null,324,null,8) from EMPLOYEES;
+select nvl2(commission_pct,5,234) from EMPLOYEES;
+select first_name,salary*12+commission_pct rem from EMPLOYEES;
+select first_name,salary*12+nvl(commission_pct,0) rem from EMPLOYEES;
+select rpad(substr(first_name,1,3),10,'?') from EMPLOYEES;
+select first_name,round(COMMISSION_PCT),ceil(COMMISSION_PCT),trim(COMMISSION_PCT) from EMPLOYEES;
+select sysdate + 10 from dual;
+select months_between('01-SEP-95','01-SEP-96') from dual;
+select months_between('01-SEP-97','01-SEP-96') from dual;
+select next_day(sysdate,'FRIDAY') from dual;
+select round(sysdate,'YEAR') from dual;
+select next_day(sysdate+20,'FRIDAY') from dual;
+select round(sysdate,'MONTH') from dual;
+
+SELECT distinct(DEPARTMENT_ID) FROM EMPLOYEES
+   where DEPARTMENT_ID is not null;
+
+select first_name||','||job_id as "Angajatul si Titulatura" from EMPLOYEES;
+
+select last_name,salary from EMPLOYEES
+    where salary between 2000 and 14000
+    order by salary desc;
+    
+select last_name,salary,commission_pct from EMPLOYEES
+    where COMMISSION_PCT is not null
+    order by COMMISSION_PCT;
+  
+select last_name,job_id,salary from EMPLOYEES
+     where 
+     (salary <> 2500 OR salary <> 3500 OR salary <> 7000)
+     and
+     (JOB_ID='ST_CLERCK' or JOB_ID='SA_REP')
+     order by last_name desc;
+     
+select last_name,salary,round(salary,0.15*salary+salary) as "NEWSAL" from EMPLOYEES;
+
+select upper(first_name),length(first_name||''||last_name) as lung,nvl(salary,0)*nvl(commission_pct,1) from employees
+   where 
+   substr(first_name,1,1)='A' OR substr(first_name,1,1)='J' OR first_name like 'M%';
+
+
+select last_name, round(MONTHS_BETWEEN
+       (hire_date,TO_DATE('12-25-2002','MM-DD-YYYY'))) as "VECHIME" from EMPLOYEES
+        where hire_date>TO_DATE('12-25-2002','MM-DD-YYYY')
+        order by 2;
+        
+
+
+
